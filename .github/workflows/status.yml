@@ -37,7 +37,7 @@ jobs:
         id: monitor
         continue-on-error: true
         env:
-          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          RESEND_API_KEY: ${{ vars.ALERTS_ENABLED == 'true' && secrets.RESEND_API_KEY || '' }}
           STATUS_EXERCISE: ${{ inputs.exercise }}
         run: node monitor.mjs
       - name: Preserve observation and notification retry state

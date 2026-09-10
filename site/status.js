@@ -12,7 +12,7 @@ async function refresh() {
   const mode = fresh ? state.mode : 'unknown';
   document.body.dataset.mode = mode;
   document.getElementById('headline').textContent = { operational: 'Service is operational', incident: 'A service issue was detected', unknown: 'Current status is unknown' }[mode];
-  document.getElementById('summary').textContent = { operational: 'The latest scheduled check passed.', incident: 'The latest check could not confirm normal service. Support is notified when an incident opens.', unknown: 'A recent check is not available. Please try the application or contact support.' }[mode];
+  document.getElementById('summary').textContent = { operational: 'The latest scheduled check passed.', incident: 'The latest check could not confirm normal service. Check again for recovery updates. Outage email setup is in progress.', unknown: 'A recent check is not available. Please try the application or contact support.' }[mode];
   document.getElementById('checked').textContent = Number.isFinite(time) ? `Last checked: ${new Date(time).toLocaleString()}` : 'Check time unavailable';
   const list = document.getElementById('history');
   list.replaceChildren();
