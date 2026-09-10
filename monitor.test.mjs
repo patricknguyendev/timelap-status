@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { mkdtemp, readFile, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import vm from 'node:vm';
 import { nextStatus, run, sendAlert, RECIPIENT } from './monitor.mjs';
 
 const at = '2026-09-10T16:00:00.000Z';
@@ -67,4 +68,24 @@ test('failed send persists incident and retries without disclosing raw probe fai
     await run({ path, now: at, verify: async () => { throw new Error(); }, notify: async () => { sends++; } });
     assert.equal(sends, 1);
   } finally { await rm(dir, { recursive: true, force: true }); }
+});
+
+test('public page refuses stale, future, malformed and unavailable health claims', async () => {
+  const script = await readFile(new URL('./site/status.js', import.meta.url), 'utf8');
+  const scenarios = [
+    [{ schemaVersion: 1, mode: 'operational', checkedAt: new Date().toISOString(), history: [] }, 'operational'],
+    [{ schemaVersion: 1, mode: 'incident', checkedAt: new Date().toISOString(), history: [] }, 'incident'],
+    [{ schemaVersion: 1, mode: 'operational', checkedAt: new Date(Date.now() - 46 * 60000).toISOString(), history: [] }, 'unknown'],
+    [{ schemaVersion: 1, mode: 'operational', checkedAt: new Date(Date.now() + 120000).toISOString(), history: [] }, 'unknown'],
+    [{ schemaVersion: 2, mode: 'operational', checkedAt: new Date().toISOString() }, 'unknown'],
+    [null, 'unknown'],
+  ];
+  for (const [payload, mode] of scenarios) {
+    const nodes = new Map();
+    const element = () => ({ textContent: '', children: [], replaceChildren() { this.children = []; }, append(child) { this.children.push(child); } });
+    const document = { body: { dataset: {} }, createElement: element, getElementById(id) { if (!nodes.has(id)) nodes.set(id, element()); return nodes.get(id); } };
+    const context = vm.createContext({ document, Date, AbortSignal, setInterval: () => {}, fetch: async () => { if (!payload) throw new Error('offline'); return Response.json(payload); } });
+    await vm.runInContext(script.replace('refresh();\nsetInterval(refresh, 60000);', 'refresh();'), context);
+    assert.equal(document.body.dataset.mode, mode);
+  }
 });
