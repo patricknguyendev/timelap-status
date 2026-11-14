@@ -1,7 +1,12 @@
 {
   "schemaVersion": 1,
-  "mode": "operational",
-  "checkedAt": "2026-11-14T20:12:55.056Z",
-  "history": [],
+  "mode": "incident",
+  "checkedAt": "2026-11-14T20:25:41.380Z",
+  "history": [
+    {
+      "mode": "incident",
+      "at": "2026-11-14T20:25:41.380Z"
+    }
+  ],
   "pending": []
 }
