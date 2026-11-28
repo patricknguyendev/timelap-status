@@ -1,8 +1,12 @@
 {
   "schemaVersion": 1,
-  "mode": "operational",
-  "checkedAt": "2026-11-28T09:40:54.820Z",
+  "mode": "incident",
+  "checkedAt": "2026-11-28T09:55:44.108Z",
   "history": [
+    {
+      "mode": "incident",
+      "at": "2026-11-28T09:55:44.108Z"
+    },
     {
       "mode": "operational",
       "at": "2026-11-14T20:40:41.529Z"
